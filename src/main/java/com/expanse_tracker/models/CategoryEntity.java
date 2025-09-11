@@ -17,8 +17,8 @@ public class CategoryEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
-    public ECategory category;
+    private ECategory category;
 }

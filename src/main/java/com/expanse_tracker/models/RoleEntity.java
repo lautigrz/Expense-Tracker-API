@@ -13,10 +13,10 @@ public class RoleEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
-    public ERole name;
+    private ERole name;
 
 
 }

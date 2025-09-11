@@ -1,16 +1,18 @@
 package com.expanse_tracker.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 @Getter
-@Service
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -18,12 +20,12 @@ import java.util.Set;
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+    private Long id;
 
     @NotBlank
-    public String username;
+    private String username;
 
-    public String password;
+    private String password;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST, targetEntity = RoleEntity.class)
     @JoinTable(
@@ -31,8 +33,8 @@ public class UserEntity {
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
     )
-    public Set<RoleEntity> roles;
+    private Set<RoleEntity> roles;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    public List<ExpenseEntity> expenses;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<ExpenseEntity> expenses = new ArrayList<>();
 }

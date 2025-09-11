@@ -4,6 +4,7 @@ package com.expanse_tracker.models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 @Getter
@@ -16,16 +17,19 @@ public class ExpenseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+    private Long id;
 
-    public String description;
+    private String description;
 
-    public Double amount;
+    private Double amount;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    public CategoryEntity category;
+    private LocalDate expenseDate;
+
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "category_id")
+    private CategoryEntity category;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    public UserEntity user;
+    private UserEntity user;
 }
