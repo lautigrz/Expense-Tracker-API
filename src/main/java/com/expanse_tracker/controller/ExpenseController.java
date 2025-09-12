@@ -3,11 +3,14 @@ package com.expanse_tracker.controller;
 import com.expanse_tracker.controller.dto.ExpenseRequest;
 import com.expanse_tracker.service.ExpenseService;
 import com.expanse_tracker.service.UserService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 public class ExpenseController {
@@ -49,6 +52,14 @@ public class ExpenseController {
 
         return ResponseEntity.ok(expenseService.filter(authentication.getName(),filter));
 
+    }
+
+
+    @GetMapping("/filterCustom")
+    public ResponseEntity<?> filterCustom(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+                                          @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin, Authentication authentication) {
+
+        return ResponseEntity.ok(expenseService.filterCustom(authentication.getName(),fechaInicio,fechaFin));
     }
 
     @GetMapping("/list")

@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @SpringBootApplication
@@ -41,7 +42,7 @@ public class ApiExpenseTrackerApplication {
 					.password(passwordEncoder.encode("12345"))
 					.roles(Set.of(RoleEntity.builder().name(ERole.valueOf(ERole.USER.name())).build()))
 					.build();
-			// Inicializar la lista después
+
 			if (user.getExpenses() == null) {
 				user.setExpenses(new ArrayList<>());
 			}
@@ -73,10 +74,42 @@ public class ApiExpenseTrackerApplication {
 					.user(user)
 					.build();
 
-			// Agregar gastos al usuario
-			user.getExpenses().add(expense1);
-			user.getExpenses().add(expense2);
-			user.getExpenses().add(expense3);
+            ExpenseEntity expense4 = ExpenseEntity.builder()
+                    .description("Cena con amigos")
+                    .amount(75.0)
+                    .expenseDate(LocalDate.now()) // hoy
+                    .category(categoryService.findByCategory("OCIO"))
+                    .user(user)
+                    .build();
+
+            ExpenseEntity expense5 = ExpenseEntity.builder()
+                    .description("Netflix")
+                    .amount(15.0)
+                    .expenseDate(LocalDate.now().minusDays(10)) // hace 10 días
+                    .category(categoryService.findByCategory("OTROS"))
+                    .user(user)
+                    .build();
+
+            ExpenseEntity expense6 = ExpenseEntity.builder()
+                    .description("Gimnasio")
+                    .amount(40.0)
+                    .expenseDate(LocalDate.now().minusMonths(2)) // hace 2 meses
+                    .category(categoryService.findByCategory("OTROS"))
+                    .user(user)
+                    .build();
+
+            ExpenseEntity expense7 = ExpenseEntity.builder()
+                    .description("Vacaciones")
+                    .amount(500.0)
+                    .expenseDate(LocalDate.now().minusYears(1)) // hace 1 año
+                    .category(categoryService.findByCategory("OTROS"))
+                    .user(user)
+                    .build();
+
+
+            user.getExpenses().addAll(
+                    List.of(expense1, expense2, expense3, expense4, expense5, expense6, expense7)
+            );
 
 			// Guardar usuario de nuevo para que cascade ALL persista los gastos
 			userRepository.save(user);

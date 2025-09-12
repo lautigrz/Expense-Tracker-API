@@ -118,6 +118,18 @@ public class ExpenseService {
 
     }
 
+    public List<ExpenseResponse> filterCustom(String username, LocalDate start, LocalDate end){
+
+        UserEntity user = userService.findByUsername(username);
+
+        List<ExpenseEntity> expenses = expenseRepository.findByUserAndExpenseDateBetween(user, start, end);
+
+        return expenses
+                .stream()
+                .map(exponse -> expenseResponse(user.getUsername(), exponse))
+                .toList();
+    }
+
 
     private ExpenseResponse expenseResponse(String username, ExpenseEntity expenseEntity) {
         return ExpenseResponse.builder()
