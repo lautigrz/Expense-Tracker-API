@@ -9,10 +9,11 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserRequest {
+public class UserDTO {
 
     public String username;
     public String password;
+    public String email;
     public Set<String> roles;
 
 }

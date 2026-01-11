@@ -33,14 +33,36 @@ public class ApiExpenseTrackerApplication {
 	@Autowired
 	private CategoryService categoryService;
 
+
 	@Bean
 	CommandLineRunner init(){
 		return args -> {
 
+			List<CategoryEntity> categories = List.of(
+					new CategoryEntity(null, ECategory.COMIDA, "restaurant", "#34d399","#e0f2f1"),
+					new CategoryEntity(null, ECategory.TRANSPORTE, "directions_bus", "#3b82f6","#dbeafe"),
+					new CategoryEntity(null, ECategory.COMBUSTIBLE, "local_gas_station", "#FFA726","#FF7043"),
+
+					new CategoryEntity(null, ECategory.SERVICIOS, "receipt_long", "#2bc52d","#C5FAC7"),
+					new CategoryEntity(null, ECategory.ROPA, "checkroom", "#6765FC","#C6C5FA"),
+					new CategoryEntity(null, ECategory.COMPRAS, "shopping_bag", "#f97316","#ffedd5"),
+					new CategoryEntity(null, ECategory.SALUD, "health_and_safety", "#FF0D0D","#FFB3B3"),
+					new CategoryEntity(null, ECategory.EDUCACION, "school", "#38D8FF","#D1F6FF"),
+					new CategoryEntity(null, ECategory.OCIO, "celebration", "#929411","#FDFFCC"),
+					new CategoryEntity(null, ECategory.VIAJES, "flight_takeoff", "#2B9EFF","#CCE7FF"),
+					new CategoryEntity(null, ECategory.MASCOTAS, "pets", "#FFBF2B","#FFF4D4"),
+					new CategoryEntity(null, ECategory.SEGUROS, "verified_user", "FF4624","FA9E8E"),
+					new CategoryEntity(null, ECategory.IMPUESTOS, "account_balance", "#FF9F33","#FFEAD4"),
+					new CategoryEntity(null, ECategory.OTROS, "category", "#C7DFFF","#3388FF")
+			);
+
+			for (CategoryEntity c : categories) {
+				categoryService.createCategory(c);
+			}
+
 			UserEntity user = UserEntity.builder()
 					.username("lauti")
 					.password(passwordEncoder.encode("12345"))
-					.roles(Set.of(RoleEntity.builder().name(ERole.valueOf(ERole.USER.name())).build()))
 					.build();
 
 			if (user.getExpenses() == null) {
@@ -54,7 +76,7 @@ public class ApiExpenseTrackerApplication {
 					.description("Supermercado")
 					.amount(50.0)
 					.expenseDate(LocalDate.now().minusDays(2)) // hace 2 días
-					.category(categoryService.findByCategory("COMESTIBLES"))
+					.category(categoryService.findByCategory("COMIDA"))
 					.user(user)
 					.build();
 
@@ -62,7 +84,7 @@ public class ApiExpenseTrackerApplication {
 					.description("Transporte")
 					.amount(20.0)
 					.expenseDate(LocalDate.now().minusWeeks(1)) // hace 1 semana
-					.category(categoryService.findByCategory("SALUD"))
+					.category(categoryService.findByCategory("TRANSPORTE"))
 					.user(user)
 					.build();
 
@@ -86,7 +108,7 @@ public class ApiExpenseTrackerApplication {
                     .description("Netflix")
                     .amount(15.0)
                     .expenseDate(LocalDate.now().minusDays(10)) // hace 10 días
-                    .category(categoryService.findByCategory("OTROS"))
+                    .category(categoryService.findByCategory("SERVICIOS"))
                     .user(user)
                     .build();
 
@@ -102,7 +124,7 @@ public class ApiExpenseTrackerApplication {
                     .description("Vacaciones")
                     .amount(500.0)
                     .expenseDate(LocalDate.now().minusYears(1)) // hace 1 año
-                    .category(categoryService.findByCategory("OTROS"))
+                    .category(categoryService.findByCategory("VIAJES"))
                     .user(user)
                     .build();
 

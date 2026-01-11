@@ -21,4 +21,10 @@ public class CategoryEntity {
 
     @Enumerated(EnumType.STRING)
     private ECategory category;
+
+    private String icon;
+
+    private String color;
+
+    private String background;
 }

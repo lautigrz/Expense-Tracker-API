@@ -1,21 +1,19 @@
 package com.expanse_tracker.controller.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+import java.time.LocalDate;
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExpenseRequest {
-
+public class ExpenseRequestDTO {
     private String description;
 
     private Double amount;
 
     private String category;
 
-    private Long userId;
+    private LocalDate date;
 }

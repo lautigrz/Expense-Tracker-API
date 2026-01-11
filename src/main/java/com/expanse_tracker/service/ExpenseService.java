@@ -1,20 +1,20 @@
 package com.expanse_tracker.service;
 
-import com.expanse_tracker.controller.dto.ExpenseRequest;
-import com.expanse_tracker.controller.dto.ExpenseResponse;
+import com.expanse_tracker.controller.dto.ExpenseRequestDTO;
+import com.expanse_tracker.controller.dto.ExpenseResponseDTO;
+import com.expanse_tracker.exception.ExpenseNotFoundException;
+import com.expanse_tracker.mapper.Mapper;
 import com.expanse_tracker.models.CategoryEntity;
-import com.expanse_tracker.models.ECategory;
 import com.expanse_tracker.models.ExpenseEntity;
 import com.expanse_tracker.models.UserEntity;
 import com.expanse_tracker.repository.ExpenseRepository;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.Arrays.stream;
 
 @Service
 public class ExpenseService {
@@ -31,22 +31,17 @@ public class ExpenseService {
 
 
     @Transactional
-    public ExpenseResponse addExpense(ExpenseRequest expense) {
+    public ExpenseResponseDTO addExpense(String username, ExpenseRequestDTO expense) {
 
-        UserEntity user = userService.findById(expense.getUserId());
+        UserEntity user = userService.findByUsername(username);
 
-        ExpenseEntity expenseEntity = ExpenseEntity.builder()
-                .description(expense.getDescription())
-                .amount(expense.getAmount())
-                .category(categoryService.findByCategory(expense.getCategory()))
-                .user(user)
-                .build();
+        ExpenseEntity expenseEntity = Mapper.toEntity(expense);
+        expenseEntity.setUser(user);
+        CategoryEntity category = categoryService.findByCategory(expense.getCategory());
+        expenseEntity.setCategory(category);
+        expenseEntity.setExpenseDate(LocalDate.now());
 
-        user.getExpenses().add(expenseEntity);
-      //  expenseRepository.save(expenseEntity);
-
-
-        return expenseResponse(user.getUsername(), expenseEntity);
+        return Mapper.toDTO(expenseRepository.save(expenseEntity));
 
     }
 
@@ -63,17 +58,17 @@ public class ExpenseService {
 
         user.getExpenses().remove(expenseEntity);
 
-        //expenseRepository.delete(expenseEntity);
+       expenseRepository.delete(expenseEntity);
     }
 
-    public ExpenseResponse updateUserExpense(String name, Long expenseId, ExpenseRequest expenseRequest) {
+    public ExpenseResponseDTO updateUserExpense(String name, Long expenseId, ExpenseRequestDTO expenseRequest) {
         UserEntity user = userService.findByUsername(name);
 
         ExpenseEntity expenseEntity = user.getExpenses()
                 .stream()
                 .filter(expense -> expense.getId().equals(expenseId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Expense not found"));
+                .orElseThrow(() -> new ExpenseNotFoundException("Expense no encontrado"));
 
         expenseEntity.setDescription(expenseRequest.getDescription());
         expenseEntity.setAmount(expenseRequest.getAmount());
@@ -82,61 +77,17 @@ public class ExpenseService {
         expenseEntity.setExpenseDate(LocalDate.now());
         expenseRepository.save(expenseEntity);
 
-        return expenseResponse(user.getUsername(), expenseEntity);
+        return Mapper.toDTO(expenseRepository.save(expenseEntity));
     }
 
 
-    public List<ExpenseResponse> filter(String username,Integer idFilter){
-        UserEntity user = userService.findByUsername(username);
-        LocalDate today = LocalDate.now();
-        List<ExpenseEntity> expenses = new ArrayList<>();
-        switch (idFilter){
-            case 1: // Semana pasada
-                LocalDate startOfLastWeek = today.minusWeeks(1).with(DayOfWeek.MONDAY);
-                LocalDate endOfLastWeek = today.minusWeeks(1).with(DayOfWeek.SUNDAY);
-                expenses = expenseRepository.findByUserAndExpenseDateBetween(user, startOfLastWeek, endOfLastWeek);
-                break;
-            case 2: // Mes pasado
-                LocalDate firstDayOfLastMonth = today.minusMonths(1).withDayOfMonth(1);
-                LocalDate lastDayOfLastMonth = today.minusMonths(1).withDayOfMonth(today.minusMonths(1).lengthOfMonth());
-                expenses = expenseRepository.findByUserAndExpenseDateBetween(user, firstDayOfLastMonth, lastDayOfLastMonth);
-                break;
+    public List<ExpenseResponseDTO> getAllExpenses(String name) {
 
-            case 3: // Últimos 3 meses
-                LocalDate threeMonthsAgo = today.minusMonths(3).withDayOfMonth(1);
-                expenses = expenseRepository.findByUserAndExpenseDateBetween(user, threeMonthsAgo, today);
-                break;
-        }
-
-
-        List<ExpenseResponse> expenseResponses = expenses
-                .stream()
-                .map(exponse -> expenseResponse(user.getUsername(), exponse))
+        UserEntity user = userService.findByUsername(name);
+        List<ExpenseEntity> expenses = expenseRepository.findByUserUsername(user.getUsername());
+        return expenses.stream()
+                .map(Mapper::toDTO)
                 .toList();
 
-        return expenseResponses;
-
-    }
-
-    public List<ExpenseResponse> filterCustom(String username, LocalDate start, LocalDate end){
-
-        UserEntity user = userService.findByUsername(username);
-
-        List<ExpenseEntity> expenses = expenseRepository.findByUserAndExpenseDateBetween(user, start, end);
-
-        return expenses
-                .stream()
-                .map(exponse -> expenseResponse(user.getUsername(), exponse))
-                .toList();
-    }
-
-
-    private ExpenseResponse expenseResponse(String username, ExpenseEntity expenseEntity) {
-        return ExpenseResponse.builder()
-                .username(username)
-                .description(expenseEntity.getDescription())
-                .amount(expenseEntity.getAmount())
-                .category(expenseEntity.getCategory().getCategory().name())
-                .build();
     }
 }

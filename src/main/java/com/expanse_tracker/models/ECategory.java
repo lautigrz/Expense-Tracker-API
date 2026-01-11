@@ -1,6 +1,19 @@
 package com.expanse_tracker.models;
 
 public enum ECategory {
-COMESTIBLES,OCIO,ELECTRONICA,UTILIDADES,ROPA,SALUD,OTROS
-
+    COMIDA,
+    TRANSPORTE,
+    COMBUSTIBLE,
+    SERVICIOS,
+    ROPA,
+    COMPRAS,
+    SALUD,
+    EDUCACION,
+    OCIO,
+    VIAJES,
+    MASCOTAS,
+    SEGUROS,
+    IMPUESTOS,
+    OTROS
 }
+
