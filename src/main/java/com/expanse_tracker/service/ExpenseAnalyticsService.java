@@ -68,6 +68,24 @@ public class ExpenseAnalyticsService {
                 .toList();
     }
 
+
+    public Double getVaration(String username){
+        DateRange thisMonth = getFecha(DateRangeType.THIS_MONTH);
+        DateRange lastMonth = getFecha(DateRangeType.LAST_MONTH);
+
+        Double totalThisMonth = expenseRepository.getTotalBetweenDates(username, thisMonth.from(), thisMonth.to());
+        Double totalLastMonth = expenseRepository.getTotalBetweenDates(username, lastMonth.from(), lastMonth.to());
+        System.out.println("Total This Month: " + totalThisMonth);
+        System.out.println("Total Last Month: " + totalLastMonth);
+        double variation = 0.0;
+
+        if (totalLastMonth != 0) {
+            variation = ((totalThisMonth - totalLastMonth) / totalLastMonth) * 100;
+        }
+        return variation;
+
+    }
+
     private DateRange getFecha(DateRangeType type) {
 
         LocalDate today = LocalDate.now();

@@ -33,16 +33,26 @@ public interface ExpenseRepository extends JpaRepository<ExpenseEntity, Integer>
     @Query("""
     SELECT new com.expanse_tracker.controller.dto.TopCategoryDTO(
         e.category.category,
+        e.category.color,
         SUM(e.amount)
        )
        FROM ExpenseEntity e
        WHERE e.user.username  = :username
        AND e.expenseDate >= :startDate
        AND e.expenseDate <= :endDate
-       GROUP  BY e.category.category
+       GROUP BY e.category.category, e.category.color
        ORDER BY SUM(e.amount) DESC
            
   """)
     List<TopCategoryDTO> findTopCategories(@Param("username") String username, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
+
+    @Query(""" 
+    SELECT COALESCE(SUM(e.amount), 0)
+    FROM ExpenseEntity e
+    WHERE e.user.username = :username
+      AND e.expenseDate >= :startDate
+      AND e.expenseDate <= :endDate
+""")
+    Double getTotalBetweenDates(@Param("username") String username, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 }

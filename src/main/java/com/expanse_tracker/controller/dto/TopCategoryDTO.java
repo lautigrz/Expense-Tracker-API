@@ -13,5 +13,6 @@ import java.math.BigDecimal;
 public class TopCategoryDTO {
 
     private ECategory category;
+    private String colorCategory;
     private Double categoryPrice;
 }

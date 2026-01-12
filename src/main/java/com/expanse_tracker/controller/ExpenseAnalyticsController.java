@@ -1,5 +1,6 @@
 package com.expanse_tracker.controller;
 
+import com.expanse_tracker.controller.dto.TopCategoryDTO;
 import com.expanse_tracker.enums.DateRangeType;
 import com.expanse_tracker.service.ExpenseAnalyticsService;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/analytics")
@@ -31,14 +33,12 @@ public class ExpenseAnalyticsController {
     }
 
 
-    @GetMapping("/top-categories")
+    @GetMapping("/summary/top-categories")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> topCategories(@RequestParam(name = "filter", defaultValue = "THIS_WEEK") DateRangeType type, Authentication authentication) {
+    public ResponseEntity<List<TopCategoryDTO>> topCategories(@RequestParam(name = "filter", defaultValue = "THIS_WEEK") DateRangeType type, Authentication authentication) {
 
         return ResponseEntity.ok(expenseAnalyticsService.topCategories(authentication.getName(),type));
     }
-
-
 
     @GetMapping("/")
     @PreAuthorize("hasRole('USER')")
@@ -47,6 +47,15 @@ public class ExpenseAnalyticsController {
         return ResponseEntity.ok(expenseAnalyticsService.filter(authentication.getName(),type));
 
     }
+
+    @GetMapping("/summary/monthly-comparison")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> variation(Authentication authentication) {
+
+        return ResponseEntity.ok(expenseAnalyticsService.getVaration(authentication.getName()));
+
+    }
+
 
 
     @GetMapping("/filter-category")
