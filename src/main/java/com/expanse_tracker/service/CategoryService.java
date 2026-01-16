@@ -1,10 +1,15 @@
 package com.expanse_tracker.service;
 
+import com.expanse_tracker.controller.dto.CategoryDTO;
 import com.expanse_tracker.exception.InvalidCategoryException;
+import com.expanse_tracker.mapper.Mapper;
 import com.expanse_tracker.models.CategoryEntity;
 import com.expanse_tracker.models.ECategory;
 import com.expanse_tracker.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.StreamSupport;
 
 @Service
 public class CategoryService {
@@ -30,6 +35,16 @@ public class CategoryService {
         } catch (IllegalArgumentException e) {
             throw new InvalidCategoryException("Categoría inválida: " + category);
         }
+    }
+
+    public List<CategoryDTO> getAllCategories() {
+
+        Iterable<CategoryEntity> categories = categoryRepository.findAll();
+
+        return StreamSupport.stream(categories.spliterator(),false)
+                .map(Mapper::toDTO)
+                .toList();
+
     }
 
 

@@ -8,6 +8,7 @@ import com.expanse_tracker.models.CategoryEntity;
 import com.expanse_tracker.models.ExpenseEntity;
 import com.expanse_tracker.models.UserEntity;
 import com.expanse_tracker.repository.ExpenseRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.DayOfWeek;
@@ -37,9 +38,12 @@ public class ExpenseService {
 
         ExpenseEntity expenseEntity = Mapper.toEntity(expense);
         expenseEntity.setUser(user);
+
         CategoryEntity category = categoryService.findByCategory(expense.getCategory());
         expenseEntity.setCategory(category);
-        expenseEntity.setExpenseDate(LocalDate.now());
+
+        LocalDate date = expense.getDate() != null ? expense.getDate() : LocalDate.now();
+        expenseEntity.setExpenseDate(date);
 
         return Mapper.toDTO(expenseRepository.save(expenseEntity));
 
@@ -84,7 +88,8 @@ public class ExpenseService {
     public List<ExpenseResponseDTO> getAllExpenses(String name) {
 
         UserEntity user = userService.findByUsername(name);
-        List<ExpenseEntity> expenses = expenseRepository.findByUserUsername(user.getUsername());
+        Sort sort = Sort.by(Sort.Direction.DESC, "expenseDate");
+        List<ExpenseEntity> expenses = expenseRepository.findByUserUsername(user.getUsername(),sort);
         return expenses.stream()
                 .map(Mapper::toDTO)
                 .toList();

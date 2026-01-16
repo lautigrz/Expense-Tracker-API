@@ -4,6 +4,7 @@ import com.expanse_tracker.controller.dto.TopCategoryDTO;
 import com.expanse_tracker.models.CategoryEntity;
 import com.expanse_tracker.models.ExpenseEntity;
 import com.expanse_tracker.models.UserEntity;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,7 +17,7 @@ import java.util.List;
 public interface ExpenseRepository extends JpaRepository<ExpenseEntity, Integer> {
     List<ExpenseEntity> findByUserAndExpenseDateBetween(UserEntity user, LocalDate startDate, LocalDate endDate);
     List<ExpenseEntity> findByUserUsernameAndCategory(String username, CategoryEntity category);
-    List<ExpenseEntity> findByUserUsername(String username);
+    List<ExpenseEntity> findByUserUsername(String username, Sort sort);
     @Query("""
     SELECT SUM(e.amount)
     FROM ExpenseEntity e
