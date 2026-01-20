@@ -29,7 +29,7 @@ public class Mapper {
                 .description(expense.getDescription())
                 .amount(expense.getAmount())
                 .category(Mapper.toDTO(expense.getCategory()))
-                .date(expense.getExpenseDate())
+                .date(expense.getExpenseDate().toLocalDate())
                 .build();
     }
 
@@ -52,7 +52,7 @@ public class Mapper {
         return ExpenseEntity.builder()
                 .description(dto.getDescription())
                 .amount(dto.getAmount())
-                .expenseDate(dto.getDate())
+                .expenseDate(dto.getDate().atStartOfDay())
                 .build();
     }
 

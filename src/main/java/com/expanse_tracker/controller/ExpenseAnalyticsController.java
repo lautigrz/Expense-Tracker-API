@@ -27,11 +27,14 @@ public class ExpenseAnalyticsController {
 
     @GetMapping("/summary")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> summary(@RequestParam(name = "filter", defaultValue = "THIS_WEEK") DateRangeType type, Authentication authentication){
-        Double suma = expenseAnalyticsService.summary(authentication.getName(), type);
+    public ResponseEntity<?> summary( @RequestParam(required = false) DateRangeType filter,
+                                      @RequestParam(required = false) String category,
+                                      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                                      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                                      Authentication authentication){
+        Double suma = expenseAnalyticsService.summary(authentication.getName(), filter, category,from,to);
         return ResponseEntity.ok(suma);
     }
-
 
     @GetMapping("/summary/top-categories")
     @PreAuthorize("hasRole('USER')")
@@ -40,38 +43,12 @@ public class ExpenseAnalyticsController {
         return ResponseEntity.ok(expenseAnalyticsService.topCategories(authentication.getName(),type));
     }
 
-    @GetMapping("/")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> filterExpenses(@RequestParam(name = "filter", defaultValue = "THIS_WEEK") DateRangeType type, Authentication authentication) {
-
-        return ResponseEntity.ok(expenseAnalyticsService.filter(authentication.getName(),type));
-
-    }
-
     @GetMapping("/summary/monthly-comparison")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> variation(Authentication authentication) {
 
         return ResponseEntity.ok(expenseAnalyticsService.getVaration(authentication.getName()));
 
-    }
-
-
-
-    @GetMapping("/filter-category")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> filterCategory(@RequestParam("category") String category, Authentication authentication) {
-
-        return ResponseEntity.ok(expenseAnalyticsService.filterByCategory(authentication.getName(),category));
-
-    }
-
-    @GetMapping("/filter-custom")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> filterCustom(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
-                                          @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin, Authentication authentication) {
-
-        return ResponseEntity.ok(expenseAnalyticsService.filterCustom(authentication.getName(),fechaInicio,fechaFin));
     }
 
 }

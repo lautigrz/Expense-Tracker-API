@@ -2,20 +2,23 @@ package com.expanse_tracker.service;
 
 import com.expanse_tracker.controller.dto.ExpenseRequestDTO;
 import com.expanse_tracker.controller.dto.ExpenseResponseDTO;
+import com.expanse_tracker.enums.DateRangeType;
 import com.expanse_tracker.exception.ExpenseNotFoundException;
 import com.expanse_tracker.mapper.Mapper;
 import com.expanse_tracker.models.CategoryEntity;
 import com.expanse_tracker.models.ExpenseEntity;
 import com.expanse_tracker.models.UserEntity;
+import com.expanse_tracker.records.DateRange;
 import com.expanse_tracker.repository.ExpenseRepository;
+import com.expanse_tracker.utils.DateRangeFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
-import static java.util.Arrays.stream;
 
 @Service
 public class ExpenseService {
@@ -42,7 +45,7 @@ public class ExpenseService {
         CategoryEntity category = categoryService.findByCategory(expense.getCategory());
         expenseEntity.setCategory(category);
 
-        LocalDate date = expense.getDate() != null ? expense.getDate() : LocalDate.now();
+        LocalDateTime date = expense.getDate().equals(LocalDate.now()) ? LocalDateTime.now() : expense.getDate().atStartOfDay();
         expenseEntity.setExpenseDate(date);
 
         return Mapper.toDTO(expenseRepository.save(expenseEntity));
@@ -78,21 +81,40 @@ public class ExpenseService {
         expenseEntity.setAmount(expenseRequest.getAmount());
         CategoryEntity category = categoryService.findByCategory(expenseRequest.getCategory());
         expenseEntity.setCategory(category);
-        expenseEntity.setExpenseDate(LocalDate.now());
+        expenseEntity.setExpenseDate(LocalDateTime.now());
         expenseRepository.save(expenseEntity);
 
         return Mapper.toDTO(expenseRepository.save(expenseEntity));
     }
 
-
-    public List<ExpenseResponseDTO> getAllExpenses(String name) {
+    public List<ExpenseResponseDTO> getExpenses(String name,
+                                                DateRangeType filter,
+                                                String category,
+                                                LocalDate from,
+                                                LocalDate to) {
 
         UserEntity user = userService.findByUsername(name);
-        Sort sort = Sort.by(Sort.Direction.DESC, "expenseDate");
-        List<ExpenseEntity> expenses = expenseRepository.findByUserUsername(user.getUsername(),sort);
-        return expenses.stream()
-                .map(Mapper::toDTO)
-                .toList();
 
+        DateRange dateRange = DateRangeFactory.dateRange(filter, from, to);
+
+        if(category != null && dateRange != null){
+            return expenseRepository.findByUserUsernameAndCategoryAndExpenseDateBetween(name, categoryService.findByCategory(category), dateRange.from(), dateRange.to(), Sort.by(Sort.Direction.DESC,"expenseDate"))
+                    .stream()
+                    .map(Mapper::toDTO)
+                    .toList();
+        }
+
+        if(dateRange != null){
+            return expenseRepository.findByUserAndExpenseDateGreaterThanEqualAndExpenseDateLessThan(user, dateRange.from(), dateRange.to(), Sort.by(Sort.Direction.DESC, "expenseDate"))
+                    .stream()
+                    .map(Mapper::toDTO)
+                    .toList();
+        }
+
+        return List.of();
     }
+
+
+
+
 }

@@ -1,17 +1,14 @@
 package com.expanse_tracker.service;
 
-import com.expanse_tracker.controller.dto.ExpenseResponseDTO;
 import com.expanse_tracker.controller.dto.TopCategoryDTO;
 import com.expanse_tracker.enums.DateRangeType;
-import com.expanse_tracker.mapper.Mapper;
 import com.expanse_tracker.models.CategoryEntity;
-import com.expanse_tracker.models.ExpenseEntity;
 import com.expanse_tracker.models.UserEntity;
 import com.expanse_tracker.records.DateRange;
 import com.expanse_tracker.repository.ExpenseRepository;
+import com.expanse_tracker.utils.DateRangeFactory;
 import org.springframework.stereotype.Service;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -28,55 +25,25 @@ public class ExpenseAnalyticsService {
         this.userService = userService;
     }
 
-    public Double summary(String username, DateRangeType dateRangeType){
-        DateRange fechas = getFecha(dateRangeType);
+    public Double summary(String username, DateRangeType dateRangeType, String categoryName, LocalDate from, LocalDate to) {
+        DateRange fechas = DateRangeFactory.dateRange(dateRangeType,from,to);
+
+        if (categoryName != null && !categoryName.isEmpty()) {
+
+            CategoryEntity categoryEntity = categoryService.findByCategory(categoryName);
+            return expenseRepository.sumByUserUsernameAndCategoryAndDateBetween(username, categoryEntity, fechas.from(), fechas.to());
+        }
+
         return expenseRepository.sumByUserUsernameAndDateBetween(username, fechas.from(), fechas.to());
     }
 
-    public List<ExpenseResponseDTO> filter(String username, DateRangeType dateRangeType) {
-        UserEntity user = userService.findByUsername(username);
-
-        DateRange fechas = getFecha(dateRangeType);
-        List<ExpenseEntity> expenses = expenseRepository.findByUserAndExpenseDateBetween(user, fechas.from(), fechas.to());
-
-        return expenses
-                .stream()
-                .map(Mapper::toDTO)
-                .toList();
-
-    }
-
-    public List<ExpenseResponseDTO> filterCustom(String username, LocalDate start, LocalDate end) {
-
-        UserEntity user = userService.findByUsername(username);
-
-        List<ExpenseEntity> expenses = expenseRepository.findByUserAndExpenseDateBetween(user, start, end);
-
-        return expenses
-                .stream()
-                .map(Mapper::toDTO)
-                .toList();
-    }
-
-    public List<ExpenseResponseDTO> filterByCategory(String name, String category) {
-
-        CategoryEntity categoryEntity = categoryService.findByCategory(category);
-
-        return expenseRepository.findByUserUsernameAndCategory(name, categoryEntity)
-                .stream()
-                .map(Mapper::toDTO)
-                .toList();
-    }
-
-
     public Double getVaration(String username){
-        DateRange thisMonth = getFecha(DateRangeType.THIS_MONTH);
-        DateRange lastMonth = getFecha(DateRangeType.LAST_MONTH);
+        DateRange thisMonth = DateRangeFactory.from(DateRangeType.THIS_MONTH);
+        DateRange lastMonth = DateRangeFactory.from(DateRangeType.LAST_MONTH);
 
         Double totalThisMonth = expenseRepository.getTotalBetweenDates(username, thisMonth.from(), thisMonth.to());
         Double totalLastMonth = expenseRepository.getTotalBetweenDates(username, lastMonth.from(), lastMonth.to());
-        System.out.println("Total This Month: " + totalThisMonth);
-        System.out.println("Total Last Month: " + totalLastMonth);
+
         double variation = 0.0;
 
         if (totalLastMonth != 0) {
@@ -86,54 +53,16 @@ public class ExpenseAnalyticsService {
 
     }
 
-    private DateRange getFecha(DateRangeType type) {
-
-        LocalDate today = LocalDate.now();
-
-        return switch (type) {
-
-            case THIS_WEEK -> {
-                yield new DateRange(
-                        today.with(DayOfWeek.MONDAY),
-                        today
-                );
-            }
-
-            case THIS_MONTH -> {
-                yield new DateRange(
-                        today.withDayOfMonth(1),
-                        today
-                );
-            }
-
-            case LAST_WEEK -> {
-                LocalDate lastWeek = today.minusWeeks(1);
-                yield new DateRange(
-                        lastWeek.with(DayOfWeek.MONDAY),
-                        lastWeek.with(DayOfWeek.SUNDAY)
-                );
-            }
-
-            case LAST_MONTH -> {
-                LocalDate lastMonth = today.minusMonths(1);
-                yield new DateRange(
-                        lastMonth.withDayOfMonth(1),
-                        lastMonth.withDayOfMonth(lastMonth.lengthOfMonth())
-                );
-            }
-
-            case LAST_3_MONTHS -> new DateRange(
-                    today.minusMonths(3).withDayOfMonth(1),
-                    today
-            );
-        };
-    }
 
     public List<TopCategoryDTO> topCategories(String name, DateRangeType type) {
 
         UserEntity user = userService.findByUsername(name);
-        DateRange fechas = getFecha(type);
+        DateRange fechas = DateRangeFactory.from(type);
 
         return expenseRepository.findTopCategories(user.getUsername(), fechas.from(), fechas.to());
     }
+
+
+
+
 }

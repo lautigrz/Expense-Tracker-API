@@ -11,13 +11,16 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface ExpenseRepository extends JpaRepository<ExpenseEntity, Integer> {
-    List<ExpenseEntity> findByUserAndExpenseDateBetween(UserEntity user, LocalDate startDate, LocalDate endDate);
-    List<ExpenseEntity> findByUserUsernameAndCategory(String username, CategoryEntity category);
-    List<ExpenseEntity> findByUserUsername(String username, Sort sort);
+    List<ExpenseEntity> findByUserAndExpenseDateGreaterThanEqualAndExpenseDateLessThan(UserEntity user, LocalDateTime startDate, LocalDateTime endDate, Sort sort);
+    List<ExpenseEntity> findByUserUsernameAndCategoryAndExpenseDateBetween(String username, CategoryEntity category,LocalDateTime startDate, LocalDateTime endDate, Sort sort);
+    List<ExpenseEntity> findByUserUsernameAndCategory(String username, CategoryEntity category, Sort sort);
+
+
     @Query("""
     SELECT SUM(e.amount)
     FROM ExpenseEntity e
@@ -27,9 +30,28 @@ public interface ExpenseRepository extends JpaRepository<ExpenseEntity, Integer>
 """)
     Double sumByUserUsernameAndDateBetween(
             @Param("username") String username,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
     );
+
+
+    @Query("""
+    SELECT SUM(e.amount)
+    FROM ExpenseEntity e
+    WHERE e.user.username = :username
+      AND e.category = :category
+      AND e.expenseDate >= :startDate
+      AND e.expenseDate <= :endDate
+""")
+    Double sumByUserUsernameAndCategoryAndDateBetween(
+            @Param("username") String username,
+            @Param("category") CategoryEntity category,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
+
+
 
     @Query("""
     SELECT new com.expanse_tracker.controller.dto.TopCategoryDTO(
@@ -45,7 +67,7 @@ public interface ExpenseRepository extends JpaRepository<ExpenseEntity, Integer>
        ORDER BY SUM(e.amount) DESC
            
   """)
-    List<TopCategoryDTO> findTopCategories(@Param("username") String username, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+    List<TopCategoryDTO> findTopCategories(@Param("username") String username, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
 
     @Query(""" 
@@ -53,7 +75,7 @@ public interface ExpenseRepository extends JpaRepository<ExpenseEntity, Integer>
     FROM ExpenseEntity e
     WHERE e.user.username = :username
       AND e.expenseDate >= :startDate
-      AND e.expenseDate <= :endDate
+      AND e.expenseDate < :endDate
 """)
-    Double getTotalBetweenDates(@Param("username") String username, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+    Double getTotalBetweenDates(@Param("username") String username, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }

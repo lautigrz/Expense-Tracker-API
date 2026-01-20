@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -75,7 +76,7 @@ public class ApiExpenseTrackerApplication {
 			ExpenseEntity expense1 = ExpenseEntity.builder()
 					.description("Supermercado")
 					.amount(50.0)
-					.expenseDate(LocalDate.now().minusDays(2)) // hace 2 días
+					.expenseDate(LocalDateTime.now().minusDays(2)) // hace 2 días
 					.category(categoryService.findByCategory("COMIDA"))
 					.user(user)
 					.build();
@@ -83,7 +84,7 @@ public class ApiExpenseTrackerApplication {
 			ExpenseEntity expense2 = ExpenseEntity.builder()
 					.description("Transporte")
 					.amount(20.0)
-					.expenseDate(LocalDate.now().minusWeeks(1)) // hace 1 semana
+					.expenseDate(LocalDateTime.now().minusWeeks(1)) // hace 1 semana
 					.category(categoryService.findByCategory("TRANSPORTE"))
 					.user(user)
 					.build();
@@ -91,7 +92,7 @@ public class ApiExpenseTrackerApplication {
 			ExpenseEntity expense3 = ExpenseEntity.builder()
 					.description("Ropa")
 					.amount(100.0)
-					.expenseDate(LocalDate.now().minusMonths(1)) // hace 1 mes
+					.expenseDate(LocalDateTime.now().minusMonths(1)) // hace 1 mes
 					.category(categoryService.findByCategory("ROPA"))
 					.user(user)
 					.build();
@@ -99,7 +100,7 @@ public class ApiExpenseTrackerApplication {
             ExpenseEntity expense4 = ExpenseEntity.builder()
                     .description("Cena con amigos")
                     .amount(75.0)
-                    .expenseDate(LocalDate.now()) // hoy
+                    .expenseDate(LocalDateTime.now()) // hoy
                     .category(categoryService.findByCategory("OCIO"))
                     .user(user)
                     .build();
@@ -107,7 +108,7 @@ public class ApiExpenseTrackerApplication {
             ExpenseEntity expense5 = ExpenseEntity.builder()
                     .description("Netflix")
                     .amount(15.0)
-                    .expenseDate(LocalDate.now().minusDays(10)) // hace 10 días
+                    .expenseDate(LocalDateTime.now().minusDays(10)) // hace 10 días
                     .category(categoryService.findByCategory("SERVICIOS"))
                     .user(user)
                     .build();
@@ -115,7 +116,7 @@ public class ApiExpenseTrackerApplication {
             ExpenseEntity expense6 = ExpenseEntity.builder()
                     .description("Gimnasio")
                     .amount(40.0)
-                    .expenseDate(LocalDate.now().minusMonths(2)) // hace 2 meses
+                    .expenseDate(LocalDateTime.now().minusMonths(2)) // hace 2 meses
                     .category(categoryService.findByCategory("OTROS"))
                     .user(user)
                     .build();
@@ -123,7 +124,7 @@ public class ApiExpenseTrackerApplication {
             ExpenseEntity expense7 = ExpenseEntity.builder()
                     .description("Vacaciones")
                     .amount(500.0)
-                    .expenseDate(LocalDate.now().minusYears(1)) // hace 1 año
+                    .expenseDate(LocalDateTime.now().minusYears(1)) // hace 1 año
                     .category(categoryService.findByCategory("VIAJES"))
                     .user(user)
                     .build();

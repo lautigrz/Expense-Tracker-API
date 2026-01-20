@@ -1,17 +1,15 @@
 package com.expanse_tracker.controller;
 
 import com.expanse_tracker.controller.dto.ExpenseRequestDTO;
-import com.expanse_tracker.controller.dto.ExpenseResponseDTO;
+import com.expanse_tracker.enums.DateRangeType;
 import com.expanse_tracker.service.ExpenseService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
 import java.net.URI;
 import java.time.LocalDate;
-import java.util.List;
 
 @RestController
 @RequestMapping("/expense")
@@ -46,11 +44,27 @@ public class ExpenseController {
 
     }
 
-    @GetMapping("/all")
+    @GetMapping
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<ExpenseResponseDTO>> list(Authentication authentication) {
-        List<ExpenseResponseDTO> expenses = expenseService.getAllExpenses(authentication.getName());
-        return ResponseEntity.ok(expenses);
+    public ResponseEntity<?> getExpenses(
+            @RequestParam(required = false) DateRangeType filter,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            Authentication authentication
+    ) {
+
+        return ResponseEntity.ok(
+                expenseService.getExpenses(
+                        authentication.getName(),
+                        filter,
+                        category,
+                        from,
+                        to
+                )
+        );
     }
 
 }

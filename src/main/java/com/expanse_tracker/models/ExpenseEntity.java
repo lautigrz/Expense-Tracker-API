@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Getter
@@ -23,7 +24,7 @@ public class ExpenseEntity {
 
     private Double amount;
 
-    private LocalDate expenseDate;
+    private LocalDateTime expenseDate;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "category_id")
