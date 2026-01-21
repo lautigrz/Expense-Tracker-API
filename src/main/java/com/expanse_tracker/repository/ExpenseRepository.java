@@ -18,8 +18,6 @@ import java.util.List;
 public interface ExpenseRepository extends JpaRepository<ExpenseEntity, Integer> {
     List<ExpenseEntity> findByUserAndExpenseDateGreaterThanEqualAndExpenseDateLessThan(UserEntity user, LocalDateTime startDate, LocalDateTime endDate, Sort sort);
     List<ExpenseEntity> findByUserUsernameAndCategoryAndExpenseDateBetween(String username, CategoryEntity category,LocalDateTime startDate, LocalDateTime endDate, Sort sort);
-    List<ExpenseEntity> findByUserUsernameAndCategory(String username, CategoryEntity category, Sort sort);
-
 
     @Query("""
     SELECT SUM(e.amount)
@@ -65,8 +63,9 @@ public interface ExpenseRepository extends JpaRepository<ExpenseEntity, Integer>
        AND e.expenseDate <= :endDate
        GROUP BY e.category.category, e.category.color
        ORDER BY SUM(e.amount) DESC
-           
-  """)
+       LIMIT 4
+          \s
+ \s""")
     List<TopCategoryDTO> findTopCategories(@Param("username") String username, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
 

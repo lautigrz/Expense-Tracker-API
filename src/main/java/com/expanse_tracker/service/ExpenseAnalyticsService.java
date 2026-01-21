@@ -37,7 +37,7 @@ public class ExpenseAnalyticsService {
         return expenseRepository.sumByUserUsernameAndDateBetween(username, fechas.from(), fechas.to());
     }
 
-    public Double getVaration(String username){
+    public Double getVariation(String username){
         DateRange thisMonth = DateRangeFactory.from(DateRangeType.THIS_MONTH);
         DateRange lastMonth = DateRangeFactory.from(DateRangeType.LAST_MONTH);
 

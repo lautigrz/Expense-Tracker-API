@@ -47,7 +47,7 @@ public class ExpenseAnalyticsController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> variation(Authentication authentication) {
 
-        return ResponseEntity.ok(expenseAnalyticsService.getVaration(authentication.getName()));
+        return ResponseEntity.ok(expenseAnalyticsService.getVariation(authentication.getName()));
 
     }
 
