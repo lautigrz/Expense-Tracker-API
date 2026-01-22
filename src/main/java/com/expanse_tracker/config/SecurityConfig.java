@@ -2,6 +2,7 @@ package com.expanse_tracker.config;
 
 import com.expanse_tracker.config.filter.JwtAuthenticationFilter;
 import com.expanse_tracker.config.filter.JwtAuthorizationFilter;
+import com.expanse_tracker.config.filter.RateLimitFilter;
 import com.expanse_tracker.config.jwt.JwtUtils;
 import com.expanse_tracker.service.UserDetailsServiceImpl;
 import jakarta.servlet.http.HttpServletResponse;
@@ -39,6 +40,9 @@ public class SecurityConfig {
     private JwtAuthorizationFilter jwtAuthorizationFilter;
 
     @Autowired
+    private RateLimitFilter rateLimitFilter;
+
+    @Autowired
     private JwtUtils jwtUtils;
 
     @Bean
@@ -62,8 +66,9 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilter(jwtAuthenticationFilter)
+                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilter(jwtAuthenticationFilter)
                 .build();
     }
 
