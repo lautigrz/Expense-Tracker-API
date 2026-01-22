@@ -1,6 +1,8 @@
 package com.expanse_tracker.config.filter;
 
 import com.expanse_tracker.config.jwt.JwtUtils;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,15 +42,13 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                                     @NotNull HttpServletResponse response,
                                     @NotNull FilterChain filterChain) throws ServletException, IOException {
 
+    String header = request.getHeader("Authorization");
 
+    if(header != null && header.startsWith("Bearer ")) {
+        String token = header.substring(7);
 
-        logger.info("JWT Authorization Filter ENTRO");
-    String token = request.getHeader("Authorization");
-
-    if(token != null && token.startsWith("Bearer ")) {
-        token = token.substring(7);
-        logger.info("JWT Authorization Filter TOKEN: " + token);
-        if(jwtUtils.validateToken(token)) {
+        try {
+            jwtUtils.validateToken(token);
             String username = jwtUtils.extractUsername(token);
             String rolesStr = jwtUtils.extractRoles(token);
 
@@ -58,9 +58,13 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authToken);
+        } catch (ExpiredJwtException e) {
+            logger.warn("Token expired");
+            SecurityContextHolder.clearContext();
+        } catch (JwtException e) {
+            logger.warn("Invalid token");
+            SecurityContextHolder.clearContext();
         }
-
-
     }
 
         filterChain.doFilter(request, response);

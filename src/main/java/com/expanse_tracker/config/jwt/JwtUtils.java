@@ -36,20 +36,12 @@ public class JwtUtils {
                 .compact();
     }
 
-    public boolean validateToken(String token) {
-        try{
-
+    public void validateToken(String token) {
             Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-
-            return true;
-
-        }catch (Exception e) {
-            return false;
-        }
     }
 
     public String extractUsername(String token) {
